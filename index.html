@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diagnóstico de Identidade</title>
+<style>
+  :root { --marinho:#1F2A44; --carvao:#2B2B2B; --chocolate:#4B3228; --areia:#E8DCC4; --offwhite:#F7F3EC; --oliva:#6B7A3A; --bordo:#6D1F2A; --camel:#C19A6B; --petroleo:#1C4E5A; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--offwhite); color:var(--carvao); font-family:"Inter","DM Sans",-apple-system,Segoe UI,Roboto,sans-serif; font-size:19px; line-height:1.6; }
+  h1,h2,h3 { font-family:"Cardo",Georgia,serif; color:var(--marinho); margin:0 0 .4em 0; line-height:1.2; }
+  h1 { font-size:2.2em; }
+  h2 { font-size:1.7em; }
+  h3 { font-size:1.4em; }
+  p { margin:0 0 .9em 0; }
+  .wrap { max-width:640px; margin:0 auto; padding:28px 22px 60px 22px; }
+  .hero { background:var(--marinho); color:var(--offwhite); padding:48px 22px 42px 22px; }
+  .hero .wrap { padding:0 0 0 0; }
+  .hero h1 { color:var(--offwhite); }
+  .hero p { color:var(--areia); }
+  .kicker { font-size:.75em; letter-spacing:.22em; text-transform:uppercase; color:var(--camel); font-weight:700; margin-bottom:10px; }
+  .btn { display:inline-block; background:var(--bordo); color:#fff; border:0; border-radius:10px; padding:16px 26px; font-size:1.05em; font-weight:700; cursor:pointer; text-decoration:none; font-family:inherit; }
+  .btn:disabled { opacity:.4; cursor:not-allowed; }
+  .btn.ghost { background:transparent; color:var(--marinho); border:2px solid var(--marinho); }
+  .progress { height:8px; background:#E4DCCB; border-radius:8px; overflow:hidden; margin:18px 0 24px 0; }
+  .progress div { height:100%; background:var(--oliva); width:0; transition:width .3s; }
+  .counter { font-size:.85em; color:var(--chocolate); letter-spacing:.08em; text-transform:uppercase; font-weight:700; }
+  .question { background:#fff; border:1px solid #E4DCCB; border-radius:14px; padding:22px 20px; margin-bottom:18px; }
+  .question h2 { font-size:1.35em; margin-bottom:16px; }
+  .opt { display:block; width:100%; text-align:left; background:var(--offwhite); border:2px solid #DCD2BE; border-radius:12px; padding:14px 16px; margin-bottom:10px; font:inherit; font-size:1em; color:var(--carvao); cursor:pointer; }
+  .opt:hover { border-color:var(--camel); }
+  .opt.sel { border-color:var(--oliva); background:#EEF1E4; font-weight:700; }
+  .nav { display:flex; justify-content:space-between; gap:12px; margin-top:20px; }
+  .score { background:var(--areia); border-left:5px solid var(--bordo); padding:16px 18px; border-radius:6px; margin:18px 0; }
+  .score p { margin:0; font-family:"Cardo",Georgia,serif; font-size:1.15em; color:var(--marinho); }
+  .perfil { background:#fff; border:1px solid #E4DCCB; border-radius:14px; padding:22px 20px; margin-bottom:16px; }
+  .perfil .faixa { font-size:.75em; letter-spacing:.18em; text-transform:uppercase; color:var(--bordo); font-weight:700; margin-bottom:6px; }
+  .proximo { background:var(--marinho); color:var(--offwhite); border-radius:14px; padding:24px 22px; margin-top:24px; }
+  .proximo .label { font-size:.75em; letter-spacing:.18em; text-transform:uppercase; color:var(--camel); font-weight:700; margin-bottom:8px; }
+  .proximo h3 { color:var(--offwhite); }
+  .proximo p { color:var(--areia); }
+  .proximo .btn { background:var(--camel); color:var(--marinho); display:block; text-align:center; margin-top:14px; }
+  textarea { width:100%; min-height:110px; font:inherit; font-size:1em; padding:12px; border:2px solid #DCD2BE; border-radius:10px; background:#fff; margin:6px 0 16px 0; }
+  .aviso { font-size:.85em; color:var(--chocolate); border-top:1px solid #DCD2BE; padding-top:14px; margin-top:24px; }
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+
+<!-- Ajuste aqui o link do ebook antes de publicar -->
+<script>
+  const EBOOK_URL = "https://SEU-LINK-DO-EBOOK-AQUI";
+</script>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">Autoavaliação</div>
+    <h1>Diagnóstico de Identidade</h1>
+    <p>Dez perguntas para olhar com honestidade para onde você está hoje. Sem nota boa ou ruim: só clareza.</p>
+    <p style="margin-top:22px;"><button class="btn" id="comecar">Começar</button></p>
+  </div>
+</header>
+
+<main class="wrap" id="app">
+
+  <!-- PERGUNTAS -->
+  <section id="quiz" class="hidden">
+    <div class="counter" id="contador"></div>
+    <div class="progress"><div id="barra"></div></div>
+    <div class="question">
+      <h2 id="pergunta"></h2>
+      <div id="opcoes"></div>
+    </div>
+    <div class="nav">
+      <button class="btn ghost" id="voltar">Voltar</button>
+      <button class="btn" id="avancar" disabled>Avançar</button>
+    </div>
+  </section>
+
+  <!-- RESULTADO -->
+  <section id="resultado" class="hidden">
+    <div class="kicker">Seu resultado</div>
+    <h2>Você tem <span id="total"></span> pontos</h2>
+    <div class="score"><p id="faixa-texto"></p></div>
+
+    <div class="perfil" id="perfil"></div>
+
+    <h3 style="margin-top:28px;">Reflita sobre suas respostas</h3>
+    <p>Escreva com honestidade. Ninguém vai ler isso além de você.</p>
+    <p><b>1. Qual resposta mais te incomodou? Por quê?</b></p>
+    <textarea></textarea>
+    <p><b>2. Que pensamento você costuma ter quando algo dá errado?</b></p>
+    <textarea></textarea>
+    <p><b>3. Se você pudesse melhorar uma área nos próximos trinta dias, qual seria?</b></p>
+    <textarea></textarea>
+
+    <div class="proximo">
+      <div class="label">Próximo passo</div>
+      <h3>Homem em Processo</h3>
+      <p>É o caminho que organizei para homens que querem firmar sua identidade passo a passo, em sete capítulos com reflexão e prática. Ele foi escrito para quem está exatamente no ponto em que você se encontra.</p>
+      <a class="btn" id="ebook" href="#" target="_blank" rel="noopener">Conhecer o ebook</a>
+    </div>
+
+    <p style="margin-top:22px;"><button class="btn ghost" id="refazer">Refazer o diagnóstico</button></p>
+
+    <div class="aviso">Este diagnóstico é uma ferramenta de reflexão pessoal. Ele não substitui acompanhamento pastoral, psicológico ou médico. Se algo nessas respostas estiver pesado demais, procure alguém de confiança ou um profissional.</div>
+  </section>
+
+</main>
+
+<script>
+  const PERGUNTAS = [
+    { q: "Quando você erra algo importante, qual pensamento aparece primeiro?",
+      o: [["Que sou um fracasso.",1],["Errei, mas ainda tenho valor.",2],["Errei. O que aprendo com isso?",3]] },
+    { q: "Sua paz depende mais de quê?",
+      o: [["Resultados de trabalho e de dinheiro.",1],["Relacionamentos e reconhecimento.",2],["Uma base que não muda com o dia.",3]] },
+    { q: "Quando alguém critica seu trabalho, você…",
+      o: [["Fica abalado por dias.",1],["Se incomoda, mas reflete sobre a crítica.",2],["Separa a crítica do seu valor pessoal.",3]] },
+    { q: "Você tem uma rotina de manhã?",
+      o: [["Não tenho.",1],["Tenho, mas quebra com frequência.",2],["Tenho e sustento na maior parte dos dias.",3]] },
+    { q: "Com que frequência você para em silêncio, sem pressa e sem celular?",
+      o: [["Quase nunca.",1],["Às vezes.",2],["Com regularidade.",3]] },
+    { q: "Quando começa algo novo e tropeça no meio, você…",
+      o: [["Desiste no primeiro tropeço.",1],["Recomeça, mas com dificuldade.",2],["Volta ao ponto de partida sem se culpar muito.",3]] },
+    { q: "Como você sente o que consome (conteúdo, redes, livros)?",
+      o: [["Me diminui com frequência.",1],["É misto.",2],["Escolho com intenção.",3]] },
+    { q: "Como você cuida do seu corpo?",
+      o: [["Não cuido.",1],["Cuido de forma irregular.",2],["Cuido com constância.",3]] },
+    { q: "Você tem pessoas de confiança que te desafiam?",
+      o: [["Não tenho ninguém a quem prestar contas.",1],["Tenho uma ou duas pessoas.",2],["Tenho pessoas que me desafiam com frequência.",3]] },
+    { q: "Se você olhasse para sua vida com honestidade, diria que…",
+      o: [["Estou perdido.",1],["Estou no meio do caminho.",2],["Estou caminhando com direção.",3]] }
+  ];
+
+  const PERFIS = [
+    { min:10, max:17, nome:"Em construção", texto:"Você está no começo de um caminho que precisa de base. Não é hora de se cobrar mais. É hora de organizar o chão. Pergunte-se: o que eu faria nos próximos trinta dias se ninguém estivesse olhando?", extra:"Quem está nesse ponto costuma ganhar muito com um caminho organizado, passo a passo." },
+    { min:18, max:24, nome:"Em processo", texto:"Você já caminha e percebe as quedas. O desafio agora é a constância: manter o que começou quando o entusiasmo passa e a vida aperta.", extra:"Quem está nesse ponto precisa menos de motivação e mais de estrutura." },
+    { min:25, max:30, nome:"Firmado em progresso", texto:"Você tem base e quer aprofundar. O crescimento agora vem de revisar o que já é sólido e de olhar com mais profundidade para as áreas que ainda pedem atenção.", extra:"" }
+  ];
+
+  let atual = 0;
+  let respostas = new Array(PERGUNTAS.length).fill(null);
+
+  const $ = id => document.getElementById(id);
+  const mostrar = id => { ["quiz","resultado"].forEach(s => $(s).classList.toggle("hidden", s !== id)); window.scrollTo(0,0); };
+
+  function renderPergunta() {
+    const p = PERGUNTAS[atual];
+    $("contador").textContent = "Pergunta " + (atual+1) + " de " + PERGUNTAS.length;
+    $("barra").style.width = ((atual) / PERGUNTAS.length * 100) + "%";
+    $("pergunta").textContent = p.q;
+    const box = $("opcoes");
+    box.innerHTML = "";
+    p.o.forEach(([texto, valor], i) => {
+      const b = document.createElement("button");
+      b.className = "opt" + (respostas[atual] === valor ? " sel" : "");
+      b.textContent = texto;
+      b.onclick = () => { respostas[atual] = valor; renderPergunta(); };
+      box.appendChild(b);
+    });
+    $("voltar").disabled = atual === 0;
+    $("avancar").disabled = respostas[atual] === null;
+    $("avancar").textContent = atual === PERGUNTAS.length - 1 ? "Ver resultado" : "Avançar";
+  }
+
+  function mostrarResultado() {
+    const total = respostas.reduce((a,b) => a + b, 0);
+    const perfil = PERFIS.find(p => total >= p.min && total <= p.max) || PERFIS[0];
+    $("total").textContent = total;
+    $("faixa-texto").textContent = "De 10 a 17 pontos: em construção. De 18 a 24 pontos: em processo. De 25 a 30 pontos: firmado em progresso.";
+    $("perfil").innerHTML = '<div class="faixa">' + perfil.min + " a " + perfil.max + ' pontos</div><h3>' + perfil.nome + '</h3><p>' + perfil.texto + '</p>' + (perfil.extra ? '<p>' + perfil.extra + '</p>' : '');
+    $("ebook").href = EBOOK_URL;
+    mostrar("resultado");
+  }
+
+  $("comecar").onclick = () => { atual = 0; respostas.fill(null); mostrar("quiz"); renderPergunta(); };
+  $("voltar").onclick = () => { if (atual > 0) { atual--; renderPergunta(); } };
+  $("avancar").onclick = () => {
+    if (atual < PERGUNTAS.length - 1) { atual++; renderPergunta(); }
+    else { mostrarResultado(); }
+  };
+  $("refazer").onclick = () => { atual = 0; respostas.fill(null); mostrar("quiz"); renderPergunta(); };
+</script>
+</body>
+</html>
